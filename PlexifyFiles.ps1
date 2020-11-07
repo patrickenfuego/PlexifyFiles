@@ -85,7 +85,7 @@ param (
 
 ### Global Variables ###
 #Change these to modify the default folder to recurse for each operating system type
-$macDefaultPath = '~/Movies/Test'
+$macDefaultPath = '~/Movies'
 $linuxDefaultPath = '~/movies'
 $windowsDefaultPath = 'F:\Media Files\Torrents Staging'
 
