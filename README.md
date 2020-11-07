@@ -1,8 +1,9 @@
 # PlexifyFiles
 
-.SYNOPSIS
-        Script for renaming Movie/TV show files that end in .mkv, .mp4, or .srt. See .EXAMPLES for formatting. 
+
+        A script for renaming Movie/TV show files that end in .mkv, .mp4, or .srt. See .EXAMPLES for formatting. 
         Cross-plaform support for Windows, MacOS, and Linux
+        
     .DESCRIPTION
         Script for renaming movie/TV show files to a more Plex/Infuse friendly format to help with the   
         metadata fetch. Can (optionally) take a path to a directory as a cli argument. If an unsupported
@@ -27,12 +28,15 @@
         |Game of Thrones| OR |Game of Thrones 1080p|                And the file names will look like:
         Game of Thrones S01E01.mkv
         Game of Thrones S01E01.en.srt
+        
         Season folders found within the parent directory will be renamed automatically.
         Regex is used to find matches for "Season <Number>" or "S<Number>" in the folder name.
         Each season *MUST* have its own folder (mini-series can use a Season 1 folder only):
+        
         | Game of Thrones 1080p                                     Top level directory
         |----Game.of.thrones.S01.1080p                              Folder name
         |--------S01E01.mkv....                                     Episode files
+        
         The new structure will look like:
         | Game of Thrones 1080p
         |----Season 1
@@ -43,9 +47,11 @@
         To use this parameter, call the script name from PowerShell/PowerShell core:
         ## Syntax ##
             .\PlexifyMovies.ps1 |Optional| [-RenamePath] <string>
+            
         ## Using a custom path ##
             WINDOWS - Pass the absolute path to the directory
                 .\PlexifyMovies -RenamePath "C:\Users\User\Desktop\Movies"
+                
             MAC / LINUX - Default path starts in user's home directory, so the relative path is fine
                                   
                 .\PlexifyMovies -RenamePath Movies
