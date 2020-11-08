@@ -93,7 +93,7 @@ $windowsDefaultPath = 'F:\Media Files\Torrents Staging'
 $warnColors = @{ForegroundColor = 'yellow' ; BackgroundColor = 'black' }
 
 #function that renames episode files. See .EXAMPLES for formatting
-function Rename-SeasonFiles ($episodes) {
+function Rename-SeasonFiles ($episodes, $seasonNum) {
     for ($i = 1; $i -le $episodes.Length; $i++) {
         #Get the full extension. If an unsupported extension is used, returns $null
         $ext = Get-Extension $episodes[$i - 1].ToString() 
@@ -202,7 +202,7 @@ function Plexify-Files ([string]$path) {
                 Write-Debug "Inside pathtype Container"
                 #Get the season number as a regex property
                 if ($_.Name -match "season (?<number>\d)") {
-                    $seasonNum = $Matches.number
+                    $seasonNumber = $Matches.number
                     $episodeFiles = Get-ChildItem -LiteralPath $_.FullName
                     #empty check for returned episode files
                     if (!$episodeFiles) {
@@ -210,14 +210,14 @@ function Plexify-Files ([string]$path) {
                         continue
                     } 
                     else {
-                        Rename-SeasonFiles $episodeFiles
+                        Rename-SeasonFiles $episodeFiles $seasonNumber
                     }
                 }
                 elseif ($_.Name -match "S(?<number>\d*)") {
-                    $seasonNum = $Matches.number
-                    if ($seasonNum -match "0(?<seasonNum>[1-9])") {
+                    $seasonNumber = $Matches.number
+                    if ($seasonNumber -match "0(?<seasonNum>[1-9])") {
                         Write-Host "Season number has a leading 0. Removing..." `n
-                        $seasonNum = $Matches.seasonNum
+                        $seasonNumber = $Matches.seasonNum
                     }
                     $episodeFiles = Get-ChildItem -LiteralPath $_.FullName
                     #empty check for returned episode files
@@ -226,10 +226,10 @@ function Plexify-Files ([string]$path) {
                         continue
                     } 
                     else {
-                        Rename-SeasonFiles $episodeFiles
+                        Rename-SeasonFiles $episodeFiles $seasonNumber
                     }
                     Write-Host "Renaming season root folder to the proper format..."`n
-                    Rename-Item $_.FullName -NewName "Season $seasonNum"
+                    Rename-Item $_.FullName -NewName "Season $seasonNumber"
                 }
                 #If no regex match is found, skip rename
                 else {
