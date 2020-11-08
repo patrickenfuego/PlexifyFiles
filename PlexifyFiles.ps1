@@ -1,20 +1,33 @@
 <#
     .SYNOPSIS
-        Script for renaming Movie/TV show files that end in .mkv, .mp4, or .srt. See .EXAMPLES for formatting. 
+
+        Script for renaming Movie/TV show files ending in .mkv, .mp4, .m4v, .avi, or .srt. See .EXAMPLE for formatting. 
         Cross-plaform support for Windows, MacOS, and Linux
 
     .DESCRIPTION
+
         Script for renaming movie/TV show files to a more Plex/Infuse friendly format to help with the   
-        metadata fetch. Can (optionally) take a path to a directory as a cli argument. If an unsupported
-        file extension is found (for example, .avi) the file will not be renamed. This is my own personal
-        bias toward the mkv/mp4 containers as I believe they are superior. Subtitle tracks ending in .srt
-        will also be renamed so that Plex/Infuse can easily match sidecar subtitles with their respective
-        file. 
+        metadata fetch. Can (optionally) take a path to a specific directory as a cli argument. 
+        
+        If an unsupported file extension is found (for example, .mka) the file will not be renamed. This is 
+        to prevent accidental renames. To add additional supoorted file extensions, add a switch clause to 
+        the Get-FileExtension function. 
+        
+        Subtitle tracks ending in .srt will also be renamed so that Plex/Infuse can easily match sidecar s
+        ubtitles with their respective file. 
+
+        All sub directories within the root directory will be renamed, and can contain a mix of movies and
+        TV Shows. 
         
     .EXAMPLE
+
         **** MOVIES ****
 
-        The parent folder must be named with a certain consistency for the script to work. Examples of names:
+        The parent folder must be named with a certain consistency for the script to work. I am currently
+        working on a solution for renaming the root folder as well, but it has been difficult due to the
+        number of potential naming schemes. 
+        
+        Examples of names:
 
         <Movie_Name> (Movie_Year) [...Whatever else here...]       such as:
         Ex Machina (2014) 2160p.HDR.AAC.5.1                        and the file names looks like:
@@ -23,9 +36,12 @@
         Ex Machina (2014).en.srt
 
     .EXAMPLE
+
         **** TV SHOWS ****
 
-        The parent folder must be named with a certain consistency for the script to work. Examples of names:
+        The parent folder must be named with a certain consistency for the script to work. I am currently
+        working on a solution for renaming the root folder as well, but it has been difficult due to the
+        number of potential naming schemes. 
 
         <Show_Name> [...Whatever else here...]                      such as:
         |Game of Thrones| OR |Game of Thrones 1080p|                And the file names will look like:
@@ -49,75 +65,105 @@
 
     .PARAMETER RenamePath
 
-        **** USAGE ****
+        Choose a custom path to the directory where the files you want to rename are located. 
 
-        To use this parameter, call the script name from PowerShell/PowerShell core:
-
-        ## Syntax ##
-
-            .\PlexifyMovies.ps1 |Optional| [-RenamePath] <string>
-
-        ## Using a custom path ##
-
-            WINDOWS - Pass the absolute path to the directory
+            WINDOWS - Pass the absolute path to the directory where your files are located. 
 
                 .\PlexifyMovies -RenamePath "C:\Users\User\Desktop\Movies"
 
-            MAC / LINUX - Default path starts in user's home directory, so the relative path is fine
+            MAC / LINUX - Default path starts in the user's home directory, so the relative path is fine in most cases.
+                          If you are having issues, try using the absolute path instead. 
                                   
-                .\PlexifyMovies -RenamePath Movies
-                .\PlexifyMovies -RenamePath "Desktop/Staging"
+                .\PlexifyMovies -RenamePath '~/Movies'
+                .\PlexifyMovies -RenamePath '~/Desktop/Staging
+
+    .PARAMETER Help
+
+        Display help information from the command line.
 
     .NOTES
-        Written by: pkelly
-        Last Edited: 11/01/2020
+        Written by: Patrick Kelly
+        Last Edited: 11/08/2020
+
+        VERSION HISTORY:
+
         Version 1.0.0 - Initial Release
         Version 1.1.0 - Added support for renaming shows
         Version 1.1.1 - Fixed bug where regex match was sometimes ignored
         Version 1.2.1 - Added support for MacOS and Linux
+        Version 1.2.2 - Fixed renaming issue when season number is 10 or greater
+        Version 1.3.2 - Added -Help switch parameter and updated help info
 
 #>
 
 param (
     [Parameter(Mandatory = $false, Position = 0)]
-    [string]$RenamePath
+    [string]$RenamePath,
+    
+    [Parameter(Mandatory = $false, Position = 1)]
+    [switch]$Help
 )
+#If the user passes the -Help parameter, show help and exit
+if ($Help) {
+    Get-Help ".\PlexifyFiles.ps1" -Detailed
+    exit
+}
 
 ### Global Variables ###
+
 #Change these to modify the default folder to recurse for each operating system type
 $macDefaultPath = '~/Movies'
 $linuxDefaultPath = '~/movies'
-$windowsDefaultPath = 'F:\Media Files\Torrents Staging'
+$windowsDefaultPath = "C:\Users\$env:USERNAME\Videos"
 
 #Warning colors. Write-Warning acts strange on PS core
 $warnColors = @{ForegroundColor = 'yellow' ; BackgroundColor = 'black' }
+#Successful rename colors
+$renameColors = @{ ForegroundColor = "Green"; BackgroundColor = "Black" }
+
+##End Global Variables ##
 
 #function that renames episode files. See .EXAMPLES for formatting
 function Rename-SeasonFiles ($episodes, $seasonNum) {
+    Write-Debug "Season number in Rename-SeasonFiles is: <$seasonNum>"
     for ($i = 1; $i -le $episodes.Length; $i++) {
         #Get the full extension. If an unsupported extension is used, returns $null
-        $ext = Get-Extension $episodes[$i - 1].ToString() 
+        $ext = Get-Extension $episodes[$i - 1].ToString()
+        Write-Host "Full path to rename is $($episodes[$i - 1].FullName)"
         if ($ext) {
-            Write-Host "Full path to rename is $($episodes[$i].FullName)"
             if ($i -lt 10) { 
-                $seasonNameString = "$newFileName S0$seasonNum`E0$i.$ext"
-                Rename-Item $episodes[$i - 1].FullName -NewName $seasonNameString
+                if ([int]$seasonNum -lt 10) {
+                    $episodeString = "$newFileName S0$seasonNum`E0$i.$ext"
+                    Rename-Item $episodes[$i - 1].FullName -NewName $episodeString
+                }
+                else {
+                    $episodeString = "$newFileName S$seasonNum`E0$i.$ext"
+                    Rename-Item $episodes[$i - 1].FullName -NewName $episodeString
+                }
             }
+            #$i is greater than 10
             else {
-                $seasonNameString = "$newFileName S0$seasonNum`E$i.$ext"
-                Rename-Item $episodes[$i - 1].FullName -NewName $seasonNameString
+                if ([int]$seasonNum -lt 10) {
+                    $episodeString = "$newFileName S0$seasonNum`E$i.$ext"
+                    Rename-Item $episodes[$i - 1].FullName -NewName $episodeString
+                }
+                else {
+                    $episodeString = "$newFileName S$seasonNum`E$i.$ext"
+                    Rename-Item $episodes[$i - 1].FullName -NewName $episodeString
+                }
             }
-
-            Write-Host "$($episodes[$i - 1].Name) renamed to: $seasonNameString" @colors `n
+            Write-Host "$($episodes[$i - 1].Name) renamed to: $episodeString" @renameColors
+            Write-Host ""
         }
         else {
             Write-Host "$($episodes[$i - 1].Name) is using an unsupported file extension. Skipping...." `
                 @warnColors
+            Write-Host ""
         }
     }
 }
-#Validates and returns the root path to recurse based on operating system. Also validates custom paths
-#Any error that occurs in this function is, by design, a terminating one
+#Validates and returns the root path to recurse based on operating system. Also validates custom paths.
+#Any error that occurs in this function is, by design, a terminating one to prevent accidental renames
 function Set-RenamePath ([string]$path) {
     #if the user does not enter a path
     if (!$path) {
@@ -165,15 +211,18 @@ function Get-Extension ($file) {
     switch ($file) {
         { $_.EndsWith(".mkv") } { return $ext = "mkv" }
         { $_.EndsWith(".mp4") } { return $ext = "mp4" }
+        { $_.EndsWith(".m4v") } { return $ext = "m4v" }
+        { $_.EndsWith(".avi") } { return $ext = "avi" }
         { $_.EndsWith(".srt") } { return $ext = "en.srt" } #Change 'en' to modify the metadata language
         #return null to skip file rename. This is to catch unsupported extensions
         Default { return $null }
     }
 }
+#Main function
 function Plexify-Files ([string]$path) {
     #Validates the root path for rename. If path check fails, the programmer defined OS path is used instead
     $root = Set-RenamePath $path
-    #Recurse directories and subdirectories
+    #Recurse the root directories and subdirectories
     Get-ChildItem -Path $root -Directory | ForEach-Object {
         #for matching movie root$rootDirs
         if ($_.Name -match "(?<title>.*)\s(?<year>\(\d\d\d\d\))\s(?<res>\d*\w)(?<extras>.*)") {
@@ -190,18 +239,17 @@ function Plexify-Files ([string]$path) {
         Write-host "<$newFileName> is the new file name"`n
         #Rename files inside parent folder
         Get-ChildItem -LiteralPath $_.FullName | ForEach-Object {
-            $colors = @{ ForegroundColor = "Green"; BackgroundColor = "Black" }
             Write-host "Top Level Name Is: <$($_.Name)>"
-            #Skip rename for Featurettes folder if one is present
-            if ($_.Name -match "Featurettes") {
-                Write-Host "Skipping Featurettes rename..."`n
-                continue
-            }
             #If the current object is a directory, need to walk deeper to rename files
             if (Test-Path -Path $_.FullName -PathType Container) {
+                #Skip rename for Featurettes/Extras folder if one is present
+                if ($_.Name -match "Featurettes" -or $_.Name -match "Extras") {
+                    Write-Host "Skipping Featurettes rename..."`n
+                    continue
+                }
                 Write-Debug "Inside pathtype Container"
                 #Get the season number as a regex property
-                if ($_.Name -match "season (?<number>\d)") {
+                if ($_.Name -match "season (?<number>\d*)") {
                     $seasonNumber = $Matches.number
                     $episodeFiles = Get-ChildItem -LiteralPath $_.FullName
                     #empty check for returned episode files
@@ -243,7 +291,8 @@ function Plexify-Files ([string]$path) {
                 $ext = Get-Extension $_.Name
                 if ($ext) {
                     Rename-Item $_.FullName -NewName "$newFileName.$ext"
-                    Write-Host "$($_.Name) renamed to: $newFileName.$ext"`n @colors 
+                    Write-Host "$($_.Name) renamed to: $newFileName.$ext"`n @renameColors
+                    Write-Host ""
                 }
                 else {
                     Write-Host "$($_.Name) is using an unsupported file extension. Skipping...."`n @warnColors
