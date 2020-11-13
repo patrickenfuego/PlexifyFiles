@@ -23,9 +23,7 @@
 
         **** MOVIES ****
 
-        The parent folder must be named with a certain consistency for the script to work. I am currently
-        working on a solution for renaming the root folder as well, but it has been difficult due to the
-        number of potential naming schemes. 
+        The parent folder must be named with a certain consistency for the script to work:
         
         Examples of names:
 
@@ -39,9 +37,7 @@
 
         **** TV SHOWS ****
 
-        The parent folder must be named with a certain consistency for the script to work. I am currently
-        working on a solution for renaming the root folder as well, but it has been difficult due to the
-        number of potential naming schemes. 
+        The parent folder must be named with a certain consistency for the script to work:
 
         <Show_Name> [...Whatever else here...]                      such as:
         |Game of Thrones| OR |Game of Thrones 1080p|                And the file names will look like:
@@ -94,6 +90,8 @@
         Version 1.2.2 - Fixed renaming issue when season number is 10 or greater
         Version 1.3.2 - Added -Help switch parameter and updated help info
 
+        TODO - Stop removing the leading 0 on season numbers, and instead add a 0 to files in the form of "season #"
+
 #>
 
 param (
@@ -114,7 +112,7 @@ if ($Help) {
 #Change these to modify the default folder to recurse for each operating system type
 $macDefaultPath = '~/Movies'
 $linuxDefaultPath = '~/movies'
-$windowsDefaultPath = "C:\Users\$env:USERNAME\Videos"
+$windowsDefaultPath = 'F:\Media Files\Torrents Staging'#"C:\Users\$env:USERNAME\Videos"
 
 #Warning colors. Write-Warning acts strange on PS core
 $warnColors = @{ForegroundColor = 'yellow' ; BackgroundColor = 'black' }
@@ -152,8 +150,10 @@ function Rename-SeasonFiles ($episodes, $seasonNum) {
                     Rename-Item $episodes[$i - 1].FullName -NewName $episodeString
                 }
             }
-            Write-Host "$($episodes[$i - 1].Name) renamed to: $episodeString" @renameColors
-            Write-Host ""
+            if ($?) {
+                Write-Host "$($episodes[$i - 1].Name) renamed to: $episodeString" @renameColors
+                Write-Host ""
+            }
         }
         else {
             Write-Host "$($episodes[$i - 1].Name) is using an unsupported file extension. Skipping...." `
@@ -218,29 +218,65 @@ function Get-Extension ($file) {
         Default { return $null }
     }
 }
+
+function Confirm-RegexMatch ([string]$value, [int]$mode) {
+    switch ($mode) {
+        #matching the title
+        0 {
+            if ($value -match "(?<title>.*)\s(?<year>\(\d\d\d\d\))\s(?<res>\d*\w)(?<extras>.*)") {
+                $newFileName = "$($Matches.title) $($Matches.year)"
+                return $newFileName
+            }
+            elseif ($value -match "(?<title>.*)\s(?<res>\d*\w).*") {
+                $newFileName = "$($Matches.title)"
+                return $newFileName
+            }
+            else { return $value }
+        }
+        #matching the season number
+        1 {
+            if ($value -match "season (?<number>\d*)") {
+                $seasonNum = "$($Matches.number)"
+                return $seasonNum
+            }
+            elseif ($value -match "S(?<number>\d+)") {
+                $seasonNum = $Matches.number
+                if ($seasonNum -match "0(?<seasonNum>[1-9])") {
+                    Write-Host "Season number has a leading 0. Removing..." `n
+                    $number = $Matches.seasonNum
+                    return $number
+                }
+                else { return $seasonNum }
+            }
+            else { return $null }
+        }
+    }
+}
+
 #Main function
 function Plexify-Files ([string]$path) {
     #Validates the root path for rename. If path check fails, the programmer defined OS path is used instead
     $root = Set-RenamePath $path
     #Recurse the root directories and subdirectories
     Get-ChildItem -Path $root -Directory | ForEach-Object {
-        #for matching movie root$rootDirs
-        if ($_.Name -match "(?<title>.*)\s(?<year>\(\d\d\d\d\))\s(?<res>\d*\w)(?<extras>.*)") {
-            $newFileName = "$($Matches.title) $($Matches.year)"
-        }
-        #for matching TV show root$rootDirs
-        elseif ($_.Name -match "(?<title>.*)\s(?<res>\d*\w).*") {
-            $newFileName = "$($Matches.title)"
-        }
-        #For anything that doesn't have extra information
-        else {
-            $newFileName = $_.Name
-        }
+        #for matching movie folders
+        $newFileName = Confirm-RegexMatch $_.Name 0
+        # if ($_.Name -match "(?<title>.*)\s(?<year>\(\d\d\d\d\))\s(?<res>\d*\w)(?<extras>.*)") {
+        #     $newFileName = "$($Matches.title) $($Matches.year)"
+        # }
+        # #for matching TV show root$rootDirs
+        # elseif ($_.Name -match "(?<title>.*)\s(?<res>\d*\w).*") {
+        #     $newFileName = "$($Matches.title)"
+        # }
+        # #For anything that doesn't have extra information
+        # else {
+        #     $newFileName = $_.Name
+        # }
         Write-host "<$newFileName> is the new file name"`n
         #Rename files inside parent folder
         Get-ChildItem -LiteralPath $_.FullName | ForEach-Object {
             Write-host "Top Level Name Is: <$($_.Name)>"
-            #If the current object is a directory, need to walk deeper to rename files
+            #If the current object is a directory
             if (Test-Path -Path $_.FullName -PathType Container) {
                 #Skip rename for Featurettes/Extras folder if one is present
                 if ($_.Name -match "Featurettes" -or $_.Name -match "Extras") {
@@ -248,42 +284,23 @@ function Plexify-Files ([string]$path) {
                     continue
                 }
                 Write-Debug "Inside pathtype Container"
-                #Get the season number as a regex property
-                if ($_.Name -match "season (?<number>\d*)") {
-                    $seasonNumber = $Matches.number
-                    $episodeFiles = Get-ChildItem -LiteralPath $_.FullName
-                    #empty check for returned episode files
-                    if (!$episodeFiles) {
-                        Write-Host "$($_.Name) does not have any files. Skipping..." @warnColors
-                        continue
-                    } 
-                    else {
-                        Rename-SeasonFiles $episodeFiles $seasonNumber
-                    }
+                $seasonNumber = Confirm-RegexMatch $_.Name 1
+                $episodeFiles = Get-ChildItem -LiteralPath $_.FullName
+                if ($seasonNumber -and $episodeFiles) {
+                    Rename-SeasonFiles $episodeFiles $seasonNumber
                 }
-                elseif ($_.Name -match "S(?<number>\d*)") {
-                    $seasonNumber = $Matches.number
-                    if ($seasonNumber -match "0(?<seasonNum>[1-9])") {
-                        Write-Host "Season number has a leading 0. Removing..." `n
-                        $seasonNumber = $Matches.seasonNum
-                    }
-                    $episodeFiles = Get-ChildItem -LiteralPath $_.FullName
-                    #empty check for returned episode files
-                    if (!$episodeFiles) {
-                        Write-Host "$($_.Name) does not have any files. Skipping..." @warnColors
-                        continue
-                    } 
-                    else {
-                        Rename-SeasonFiles $episodeFiles $seasonNumber
-                    }
-                    Write-Host "Renaming season root folder to the proper format..."`n
-                    Rename-Item $_.FullName -NewName "Season $seasonNumber"
-                }
-                #If no regex match is found, skip rename
                 else {
-                    Write-Host "Skipping rename for $($_.Name)"
-                    continue
-                }   
+                    Write-Host "$($_.Name) was either a bad match or the folder has no episodes. 
+                                Skipping Rename..." @warnColors
+                    continue 
+                }
+                #If substring contains "S#+", rename to "Season #"  
+                if ($_.Name -match "S{1}[0-9]+") {
+                    Write-Host "Renaming season folder to the proper format..."
+                    Rename-Item $_.FullName -NewName ($_.Name -replace $_.Name, "Season $seasonNumber")
+                    if ($?) { Write-Host "Folder rename Successful"`n }
+                    else { Write-Host "Folder rename unsucessful"`n @warnColors } 
+                }  
             }
             #If the current object is a file
             elseif (Test-Path -Path $_.FullName -PathType Leaf) {
