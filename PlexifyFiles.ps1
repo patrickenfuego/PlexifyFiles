@@ -117,7 +117,7 @@ $windowsDefaultPath = 'F:\Media Files\Torrents Staging'#"C:\Users\$env:USERNAME\
 #Warning colors. Write-Warning acts strange on PS core
 $warnColors = @{ForegroundColor = 'yellow' ; BackgroundColor = 'black' }
 #Successful rename colors
-$renameColors = @{ ForegroundColor = "Green"; BackgroundColor = "Black" }
+$successColors = @{ ForegroundColor = "Green"; BackgroundColor = "Black" }
 
 ##End Global Variables ##
 
@@ -151,7 +151,7 @@ function Rename-SeasonFiles ($episodes, $seasonNum) {
                 }
             }
             if ($?) {
-                Write-Host "$($episodes[$i - 1].Name) renamed to: $episodeString" @renameColors
+                Write-Host "$($episodes[$i - 1].Name) renamed to: $episodeString" @successColors
                 Write-Host ""
             }
         }
@@ -254,24 +254,13 @@ function Confirm-RegexMatch ([string]$value, [int]$mode) {
 }
 
 #Main function
-function Plexify-Files ([string]$path) {
+function Rename-PlexFiles ([string]$path) {
     #Validates the root path for rename. If path check fails, the programmer defined OS path is used instead
     $root = Set-RenamePath $path
     #Recurse the root directories and subdirectories
     Get-ChildItem -Path $root -Directory | ForEach-Object {
-        #for matching movie folders
+        #match the new root folder name
         $newFileName = Confirm-RegexMatch $_.Name 0
-        # if ($_.Name -match "(?<title>.*)\s(?<year>\(\d\d\d\d\))\s(?<res>\d*\w)(?<extras>.*)") {
-        #     $newFileName = "$($Matches.title) $($Matches.year)"
-        # }
-        # #for matching TV show root$rootDirs
-        # elseif ($_.Name -match "(?<title>.*)\s(?<res>\d*\w).*") {
-        #     $newFileName = "$($Matches.title)"
-        # }
-        # #For anything that doesn't have extra information
-        # else {
-        #     $newFileName = $_.Name
-        # }
         Write-host "<$newFileName> is the new file name"`n
         #Rename files inside parent folder
         Get-ChildItem -LiteralPath $_.FullName | ForEach-Object {
@@ -308,7 +297,7 @@ function Plexify-Files ([string]$path) {
                 $ext = Get-Extension $_.Name
                 if ($ext) {
                     Rename-Item $_.FullName -NewName "$newFileName.$ext"
-                    Write-Host "$($_.Name) renamed to: $newFileName.$ext"`n @renameColors
+                    Write-Host "$($_.Name) renamed to: $newFileName.$ext"`n @successColors
                     Write-Host ""
                 }
                 else {
@@ -321,12 +310,12 @@ function Plexify-Files ([string]$path) {
 
 ###################################### Main script logic ######################################
 
-Write-Host "Starting script`n`n"
+Write-Host "`n`nStarting script...`n" @successColors
 
 if ($RenamePath) {
-    Plexify-Files $RenamePath
+    Rename-PlexFiles $RenamePath
 }
 else {
-    Plexify-Files
+    Rename-PlexFiles
 }
 
