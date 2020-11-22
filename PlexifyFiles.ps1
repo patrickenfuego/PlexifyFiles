@@ -154,6 +154,9 @@ function Rename-SeasonFiles ($episodes, $seasonNum) {
                 Write-Host "$($episodes[$i - 1].Name) renamed to: $episodeString" @successColors
                 Write-Host ""
             }
+            else { 
+                Write-Host "There was an issue renaming the file: " $episodes[$i - 1].Name @warnColors
+            }
         }
         else {
             Write-Host "$($episodes[$i - 1].Name) is using an unsupported file extension. Skipping...." `
@@ -223,11 +226,11 @@ function Confirm-RegexMatch ([string]$value, [int]$mode) {
     switch ($mode) {
         #matching the title
         0 {
-            if ($value -match "(?<title>.*)\s(?<year>\(\d\d\d\d\))\s(?<res>\d*\w)(?<extras>.*)") {
+            if ($value -match "(?<title>.*) (?<year>\(\d{4}\)) (?<res>\d{3,4}p)(?<extras>.*)") {
                 $newFileName = "$($Matches.title) $($Matches.year)"
                 return $newFileName
             }
-            elseif ($value -match "(?<title>.*)\s(?<res>\d*\w).*") {
+            elseif ($value -match "(?<title>.*) (?<res>\d{3,4}p)(?<extras>.*)") {
                 $newFileName = "$($Matches.title)"
                 return $newFileName
             }
