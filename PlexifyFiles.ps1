@@ -256,34 +256,10 @@ function Confirm-RegexMatch ([string]$value, [int]$mode) {
 function Rename-RootDirectory ([string]$path) {
     #Validates the root path for rename. If path check fails, the programmer defined OS path is used instead
     $root = Set-RenamePath $path
-    Get-ChildItem -Path $root -Directory | ForEach-Object {
-        # switch -Regex ($_.Name) {
-        #     #Matches most movie string permutations. Still testing
-        #     "(?<title>.*)[\.\s\(]+(?<year>\d{4}).*(?<res>\d{3,4}p)" {
-        #         $name = ($Matches.title.Replace(".", " ")).Trim()
-        #         $year = "($($Matches.year))"
-        #         $resolution = ($Matches.res).Trim()
-        
-        #         $title = "$name $year $resolution"
-        #         Rename-Item $_.FullName -NewName ($_.Name.Replace($title))
-        #         if ($?) { Write-Host "Root directory $($_.Name) renamed successfully" @successColors }
-        #         else { Write-Host "There was an issue renaming " $_.Name @warnColors }
-        #     }
-        #     #Matches most TV show string permutations. Still testing 
-        #     "(?<title>.*)[\.\s\(]+(?<res>\d{3,4}p)" {
-        #         Write-Host "Match for TV show"
-        #         $name = ($Matches.title.Replace(".", " ")).Trim()
-        #         $resolution = ($Matches.res).Trim()
-        
-        #         $title = "$name $resolution"
-        #         Rename-Item $_.FullName -NewName ($_.Name.Replace($title))
-        #         if ($?) { Write-Host "Root directory $($_.Name) renamed successfully" @successColors }
-        #         else { Write-Host "There was an issue renaming " $_.Name @warnColors }
-        #     }
-        #     default { Write-Host "There was an issue renaming the root directory: " $_.Name @warnColors }
-        # }     
-        if ($_.Name -match "(?<title>.*)[\.\s\(]+(?<year>\d{4}).*(?<res>\d{3,4}p)") {
+    Get-ChildItem -Path $root -Directory | ForEach-Object {     
+        if ($_.Name -match "(?<title>.*)[\.\s\[\(]+(?<year>\d{4}).*[\.\s\[\(]+(?<res>\d{3,4}p)") {
             $name = ($Matches.title.Replace(".", " ")).Trim()
+            $name = $name.Replace(":", " -")
             $year = "($($Matches.year))"
             $resolution = ($Matches.res).Trim()
         
