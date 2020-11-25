@@ -6,18 +6,7 @@ A script for renaming movie/TV show files to a more Plex friendly format, which 
 
 A movie folder will look like this after running the script:
 
-|Ex Machina (2014) 2160p
-|----Ex Machina (2014).mkv
-|----Ex Machina (2014).en.srt
-
-And a TV Show folder will look like this:
-
-|Game of Thrones
-|----Season 1
-|     |----Game of Thrones S01E01.mkv
-|     |----Game of Thrones S01E02.mkv ...
-|----Season 2
-      |----Game of Thrones S02E01.mkv ...
+>Ex Machina (2014) 2160p
 
 ## Path
 
