@@ -38,7 +38,7 @@ Episode files will look like:
 
 ## Path
 
-the script will recursively rename all directoriesc (and their respective files) within a specified path. By default, the script uses the following default locations:
+the script will recursively rename all directories (and their respective files) within a specified path. By default, the script uses the following default locations:
 
 - Linux:   `/home/user/Videos`
 - MacOS:   `/Users/user/Movies`
