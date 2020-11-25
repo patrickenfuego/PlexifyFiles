@@ -18,7 +18,7 @@ And the files will look like this:
 
 ### TV Shows
 
-TV show folder will look like this after running the script:
+TV show folders will look like this after running the script:
 
 Game of Thrones 1080p
 
