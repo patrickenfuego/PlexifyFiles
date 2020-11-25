@@ -112,7 +112,7 @@ if ($Help) {
 #Change these to modify the default folder to recurse for each operating system type
 $macDefaultPath = '~/Movies'
 $linuxDefaultPath = '~/movies'
-$windowsDefaultPath = 'F:\Media Files\Torrents Staging'#"C:\Users\$env:USERNAME\Videos"
+$windowsDefaultPath = "C:\Users\$env:USERNAME\Videos"
 
 #Warning colors. Write-Warning acts strange on PS core
 $warnColors = @{ForegroundColor = 'yellow' ; BackgroundColor = 'black' }
