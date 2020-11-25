@@ -4,9 +4,31 @@ A script for renaming movie/TV show files to a more Plex friendly format, which 
 
 ## Structure
 
-A movie folder will look like this after running the script:
+### Movies
+
+Movie folders will look like this after running the script:
 
 >Ex Machina (2014) 2160p
+
+And the files will look like this:
+
+>Ex Machina (2014).mkv
+>Ex Machina (2014).srt
+
+### TV Shows
+
+TV show folder will look like this after running the script:
+
+Game of Thrones 1080p
+
+Each season must have its own folder. The script will look for "S01" in the folder name, and rename folders to:
+
+>Season1
+
+Episode files will look like:
+
+>Game of Thrones S01E01.mkv
+>Game of Thrones S01E02.mkv  etc.
 
 ## Path
 
