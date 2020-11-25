@@ -2,6 +2,8 @@
 
 A script for renaming movie/TV show files and folders to a more Plex friendly format, which helps with the metadata fetch. Renaming files manually take a very long time, so I decided to write this script.
 
+
+
 The script has cross platform support with MacOS and Linux using PowerShell Core. For more information on installing PowerShell core, please see [here](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell?view=powershell-7.1).
 
 ## Structure
@@ -36,13 +38,13 @@ Episode files will look like:
 
 ## Path
 
-By default, the script uses the following default locations:
+the script will recursively rename all directoriesc (and their respective files) within a specified path. By default, the script uses the following default locations:
 
 - Linux:   `/home/user/Videos`
 - MacOS:   `/Users/user/Movies`
 - Windows: `C:\Users\user\Videos`
 
-The script can also receive a user defined path as a command line argument. To use a different path:
+The script can also receive an optional user defined path as a command line argument. To use a different path:
 
         PS> .\PlexifyFiles.ps1 -RenamePath 'C:\Users\user\some\directory'
         
