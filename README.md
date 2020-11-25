@@ -1,6 +1,6 @@
 # PlexifyFiles
 
-A script for renaming movie/TV show files to a more Plex friendly format, which helps with the metadata fetch. 
+A script for renaming movie/TV show files and folders to a more Plex friendly format, which helps with the metadata fetch. Renaming files manually take a very long time, so I decided to write this script. 
 
 ## Structure
 
