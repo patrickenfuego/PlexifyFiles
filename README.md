@@ -36,7 +36,7 @@ Episode files will look like:
 
 By default, the script uses the following default locations:
 
-- Linux:   `/home/user`
+- Linux:   `/home/user/Videos`
 - MacOS:   `/Users/user/Movies`
 - Windows: `C:\Users\user\Videos`
 
