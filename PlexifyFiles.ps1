@@ -197,7 +197,7 @@ function Set-Path ([string]$path) {
     #The user entered a specific path
     elseif (Test-Path -Path $path) {
         $rootDir = $path
-        Write-Host "Path validation successful. Path is: $rootDir"`n
+        Write-Host "Path validation successful. Path is:`t$rootDir"`n @successColors
         return $rootDir
     }
     #the user supplied path could not be verified 
@@ -256,9 +256,7 @@ function Confirm-RegexMatch ([string]$value, [int]$mode) {
 
 #Renames the root directory for each movie/show
 function Rename-RootDirectory ([string]$path) {
-    #Validates the root path for rename. If path check fails, the programmer defined OS path is used instead
-    $root = Set-Path $path
-    Get-ChildItem -Path $root -Directory | ForEach-Object {  
+    Get-ChildItem -Path $path -Directory | ForEach-Object {  
         #Checks for a movie title match   
         if ($_.Name -match "(?<title>.*)[\.\s\[\(]+(?<year>\d{4}).*[\.\s\[\(]+(?<res>\d{3,4}p)") {
             $name = ($Matches.title.Replace(".", " ")).Trim()
@@ -299,10 +297,8 @@ function Rename-RootDirectory ([string]$path) {
 
 #Main function
 function Rename-PlexFiles ([string]$path) {
-    #Validates the root path for rename. If path check fails, the programmer defined OS path is used instead
-    $root = Set-Path $path
     #Recurse the root directories and subdirectories
-    Get-ChildItem -Path $root -Directory | ForEach-Object {
+    Get-ChildItem -Path $path -Directory | ForEach-Object {
         #match the new root folder name
         $newFileName = Confirm-RegexMatch $_.Name 0
         Write-host "<$newFileName> is the new file name"`n
@@ -354,16 +350,11 @@ function Rename-PlexFiles ([string]$path) {
 
 ###################################### Main script logic ######################################
 
-Write-Host "`n`nStarting script...`n" @successColors
+Write-Host "`n`nStarting script..." @successColors
 
-if ($Path) {
-    Rename-RootDirectory $Path
-    Rename-PlexFiles $Path
-}
-else {
-    Rename-RootDirectory
-    Rename-PlexFiles
-}
+$validatedPath = Set-Path $Path
+Rename-RootDirectory $validatedPath
+Rename-PlexFiles $validatedPath
 
 Read-Host -Prompt "Press Enter to exit"
 
