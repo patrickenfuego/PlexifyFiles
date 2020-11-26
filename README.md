@@ -34,7 +34,9 @@ Episode files will look like:
 
 >Game of Thrones S01E01.mkv
 
->Game of Thrones S01E02.mkv  etc.
+>Game of Thrones S01E02.mkv  
+
+etc.
 
 ## Path
 
