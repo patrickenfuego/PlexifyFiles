@@ -34,11 +34,13 @@ Episode files will look like:
 
 >Game of Thrones S01E01.mkv
 
->Game of Thrones S01E02.mkv  etc.
+>Game of Thrones S01E02.mkv  
+
+etc.
 
 ## Path
 
-the script will recursively rename all directoriesc (and their respective files) within a specified path. By default, the script uses the following default locations:
+the script will recursively rename all directories (and their respective files) within a specified path. By default, the script uses the following default locations:
 
 - Linux:   `/home/user/Videos`
 - MacOS:   `/Users/user/Movies`
@@ -68,4 +70,3 @@ Additional extensions can be added by modifying the script.
 Currently, renaming of the root directory is still in testing. It seems to be working well so far, but additional testing against different string permutations is needed. To use this version, see the qa branch.
 
 Otherwise, you will need to manually rename the root folders using the aformentioned structure in order for the rest of the script to work; this is because the script relies on the root folder for file renaming.
-To use this feature,
