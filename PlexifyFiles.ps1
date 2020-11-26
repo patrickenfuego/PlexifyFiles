@@ -365,3 +365,5 @@ else {
     Rename-PlexFiles
 }
 
+Read-Host -Prompt "Press Enter to exit"
+
