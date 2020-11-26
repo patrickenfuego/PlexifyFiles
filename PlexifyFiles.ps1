@@ -112,7 +112,7 @@ if ($Help) {
 #Change these to modify the default folder to recurse for each operating system type
 $macDefaultPath = '~/Movies'
 $linuxDefaultPath = '~/movies'
-$windowsDefaultPath = "C:\Users\$env:USERNAME\Videos"
+$windowsDefaultPath = 'F:\Media Files\Test'#"C:\Users\$env:USERNAME\Videos"
 
 #Warning colors. Write-Warning acts strange on PS core
 $warnColors = @{ForegroundColor = 'Yellow' ; BackgroundColor = 'Black' }
@@ -206,6 +206,7 @@ function Set-Path ([string]$path) {
         Throw "Could not resolve the user supplied path: <$path>. Check that the path exists and try again."
     }
 }
+
 #Validates and returns the file extension. To add additional supported file extensions, create a new switch clause
 function Get-Extension ($file) {
     switch ($file) {
@@ -252,6 +253,7 @@ function Confirm-RegexMatch ([string]$value, [int]$mode) {
         }
     }
 }
+
 #Renames the root directory for each movie/show
 function Rename-RootDirectory ([string]$path) {
     #Validates the root path for rename. If path check fails, the programmer defined OS path is used instead
@@ -282,7 +284,11 @@ function Rename-RootDirectory ([string]$path) {
 
             Rename-Item $_.FullName -NewName ($_.Name.Replace($_.Name, $title))
             if ($?) { Write-Host "Root directory $title renamed successfully" @successColors }
-            else { Write-Host "There was an issue renaming " $_.Name @warnColors }
+            else {
+                $msg = "There was an issue renaming  $($_.Name). This usually happens when " + 
+                "attempting to rename a folder with the same existing name."
+                Write-Host $msg  @warnColors  
+            }
         }
         else {
             Write-Host "There was an issue renaming the root directory: " $_.Name @warnColors
