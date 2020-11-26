@@ -112,7 +112,7 @@ if ($Help) {
 #Change these to modify the default folder to recurse for each operating system type
 $macDefaultPath = '~/Movies'
 $linuxDefaultPath = '~/movies'
-$windowsDefaultPath = 'F:\Media Files\Test'#"C:\Users\$env:USERNAME\Videos"
+$windowsDefaultPath = "C:\Users\$env:USERNAME\Videos"
 
 #Warning colors. Write-Warning acts strange on PS core
 $warnColors = @{ForegroundColor = 'Yellow' ; BackgroundColor = 'Black' }
@@ -272,7 +272,7 @@ function Rename-RootDirectory ([string]$path) {
             else {
                 $msg = "There was an issue renaming  $($_.Name). This usually happens when " + 
                 "attempting to rename a folder with the same existing name."
-                Write-Host $msg  @warnColors 
+                Write-Host $msg @warnColors 
             }
         }
         #Checks for a TV show match
@@ -287,7 +287,7 @@ function Rename-RootDirectory ([string]$path) {
             else {
                 $msg = "There was an issue renaming  $($_.Name). This usually happens when " + 
                 "attempting to rename a folder with the same existing name."
-                Write-Host $msg  @warnColors  
+                Write-Host $msg @warnColors  
             }
         }
         else {
