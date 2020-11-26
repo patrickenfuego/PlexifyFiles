@@ -59,19 +59,19 @@
         |----Season 1
         |--------Game of Thrones S01E01.mkv....
 
-    .PARAMETER RenamePath
+    .PARAMETER Path
 
         Choose a custom path to the directory where the files you want to rename are located. 
 
             WINDOWS - Pass the absolute path to the directory where your files are located. 
 
-                .\PlexifyMovies -RenamePath "C:\Users\User\Desktop\Movies"
+                .\PlexifyMovies -Path "C:\Users\User\Desktop\Movies"
 
             MAC / LINUX - Default path starts in the user's home directory, so the relative path is fine in most cases.
                           If you are having issues, try using the absolute path instead. 
                                   
-                .\PlexifyMovies -RenamePath '~/Movies'
-                .\PlexifyMovies -RenamePath '~/Desktop/Staging
+                .\PlexifyMovies -Path '~/Movies'
+                .\PlexifyMovies -Path '~/Desktop/Staging
 
     .PARAMETER Help
 
@@ -96,7 +96,7 @@
 
 param (
     [Parameter(Mandatory = $false, Position = 0)]
-    [string]$RenamePath,
+    [string]$Path,
     
     [Parameter(Mandatory = $false, Position = 1)]
     [switch]$Help
@@ -115,7 +115,7 @@ $linuxDefaultPath = '~/movies'
 $windowsDefaultPath = "C:\Users\$env:USERNAME\Videos"
 
 #Warning colors. Write-Warning acts strange on PS core
-$warnColors = @{ForegroundColor = 'yellow' ; BackgroundColor = 'black' }
+$warnColors = @{ForegroundColor = 'Yellow' ; BackgroundColor = 'Black' }
 #Successful rename colors
 $successColors = @{ ForegroundColor = "Green"; BackgroundColor = "Black" }
 
@@ -164,7 +164,7 @@ function Rename-SeasonFiles ($episodes, $seasonNum) {
 }
 #Validates and returns the root path to recurse based on operating system. Also validates custom paths.
 #Any error that occurs in this function is, by design, a terminating one to prevent accidental renames
-function Set-RenamePath ([string]$path) {
+function Set-Path ([string]$path) {
     #if the user does not enter a path
     if (!$path) {
         if ($isMacOS) {
@@ -255,25 +255,31 @@ function Confirm-RegexMatch ([string]$value, [int]$mode) {
 #Renames the root directory for each movie/show
 function Rename-RootDirectory ([string]$path) {
     #Validates the root path for rename. If path check fails, the programmer defined OS path is used instead
-    $root = Set-RenamePath $path
-    Get-ChildItem -Path $root -Directory | ForEach-Object {     
+    $root = Set-Path $path
+    Get-ChildItem -Path $root -Directory | ForEach-Object {  
+        #Checks for a movie title match   
         if ($_.Name -match "(?<title>.*)[\.\s\[\(]+(?<year>\d{4}).*[\.\s\[\(]+(?<res>\d{3,4}p)") {
             $name = ($Matches.title.Replace(".", " ")).Trim()
             $name = $name.Replace(":", " -")
             $year = "($($Matches.year))"
             $resolution = ($Matches.res).Trim()
-        
-        
             $title = "$name $year $resolution"
-            Rename-Item $_.FullName -NewName ($_.Name.Replace($_.Name, $title))
+            #$_.Name.Replace($_.Name, $title)
+            Rename-Item $_.FullName -NewName ($_.Name.Replace($_.Name, $title)) -Force
             if ($?) { Write-Host "Root directory $title renamed successfully" @successColors }
-            else { Write-Host "There was an issue renaming " $_.Name @warnColors }
+            else {
+                $msg = "There was an issue renaming  $($_.Name). This usually happens when " + 
+                "attempting to rename a folder with the same existing name."
+                Write-Host $msg  @warnColors 
+            }
         }
+        #Checks for a TV show match
         elseif ($_.Name -match "(?<title>.*)[\.\s\(]+(?<res>\d{3,4}p)") {
             $name = ($Matches.title.Replace(".", " ")).Trim()
+            $name = $name.Replace(":", " -")
             $resolution = ($Matches.res).Trim()
-        
             $title = "$name $resolution"
+
             Rename-Item $_.FullName -NewName ($_.Name.Replace($_.Name, $title))
             if ($?) { Write-Host "Root directory $title renamed successfully" @successColors }
             else { Write-Host "There was an issue renaming " $_.Name @warnColors }
@@ -288,7 +294,7 @@ function Rename-RootDirectory ([string]$path) {
 #Main function
 function Rename-PlexFiles ([string]$path) {
     #Validates the root path for rename. If path check fails, the programmer defined OS path is used instead
-    $root = Set-RenamePath $path
+    $root = Set-Path $path
     #Recurse the root directories and subdirectories
     Get-ChildItem -Path $root -Directory | ForEach-Object {
         #match the new root folder name
@@ -344,9 +350,9 @@ function Rename-PlexFiles ([string]$path) {
 
 Write-Host "`n`nStarting script...`n" @successColors
 
-if ($RenamePath) {
-    Rename-RootDirectory $RenamePath
-    Rename-PlexFiles $RenamePath
+if ($Path) {
+    Rename-RootDirectory $Path
+    Rename-PlexFiles $Path
 }
 else {
     Rename-RootDirectory
