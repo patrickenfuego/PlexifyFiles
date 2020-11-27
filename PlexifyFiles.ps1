@@ -289,8 +289,8 @@ function Rename-RootDirectory ([string]$path) {
         }
         else {
             $msg = "There was an issue renaming the root folder: $($_.Name). " +
-                    "This occurs when a reliable match cannot be made for movie/TV show " +
-                    "folder name in its current format.`nSkipping rename..."
+            "This occurs when a reliable match cannot be made for movie/TV show " +
+            "folder name in its current format.`nSkipping rename..."
             Write-Host $msg @warnColors
             continue
         }   
