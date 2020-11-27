@@ -312,7 +312,6 @@ function Rename-PlexFiles ([string]$path) {
                     Write-Host "Skipping Featurettes rename..."`n
                     continue
                 }
-                Write-Debug "Inside pathtype Container"
                 $seasonNumber = Confirm-RegexMatch $_.Name 1
                 $episodeFiles = Get-ChildItem -LiteralPath $_.FullName
                 if ($seasonNumber -and $episodeFiles) {
@@ -320,7 +319,7 @@ function Rename-PlexFiles ([string]$path) {
                 }
                 else {
                     Write-Host "$($_.Name) was either a bad match or the folder has no episodes. 
-                                Skipping Rename..." @warnColors
+                    Skipping Rename..." @warnColors
                     continue 
                 }
                 #If substring contains "S#+", rename to "Season #"  
@@ -333,7 +332,6 @@ function Rename-PlexFiles ([string]$path) {
             }
             #If the current object is a file
             elseif (Test-Path -Path $_.FullName -PathType Leaf) {
-                Write-Debug "Inside pathtype leaf"
                 $ext = Get-Extension $_.Name
                 if ($ext) {
                     Rename-Item $_.FullName -NewName "$newFileName.$ext"
