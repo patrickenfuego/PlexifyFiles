@@ -123,11 +123,10 @@ $successColors = @{ ForegroundColor = "Green"; BackgroundColor = "Black" }
 
 #function that renames episode files. See .EXAMPLES for formatting
 function Rename-SeasonFiles ($episodes, $seasonNum) {
-    Write-Debug "Season number in Rename-SeasonFiles is: <$seasonNum>"
     for ($i = 1; $i -le $episodes.Length; $i++) {
         #Get the full extension. If an unsupported extension is used, returns $null
         $ext = Get-Extension $episodes[$i - 1].ToString()
-        Write-Host "Full path to rename is $($episodes[$i - 1].FullName)"
+        Write-Host "File name is:`t" $episodes[$i - 1]
         if ($ext) {
             if ($i -lt 10) { 
                 if ([int]$seasonNum -lt 10) {
@@ -243,7 +242,7 @@ function Confirm-RegexMatch ([string]$value, [int]$mode) {
             elseif ($value -match "S(?<number>\d+)") {
                 $seasonNum = $Matches.number
                 if ($seasonNum -match "0(?<seasonNum>[1-9])") {
-                    Write-Host "Season number has a leading 0. Removing..." `n
+                    Write-Host "Season number has a leading 0. Removing...`n" 
                     $number = $Matches.seasonNum
                     return $number
                 }
@@ -304,7 +303,6 @@ function Rename-PlexFiles ([string]$path) {
         Write-host "<$newFileName> is the new file name"`n
         #Rename files inside parent folder
         Get-ChildItem -LiteralPath $_.FullName | ForEach-Object {
-            Write-host "Top Level Name Is: <$($_.Name)>"
             #If the current object is a directory
             if (Test-Path -Path $_.FullName -PathType Container) {
                 #Skip rename for Featurettes/Extras folder if one is present
