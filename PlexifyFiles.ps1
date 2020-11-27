@@ -339,8 +339,12 @@ function Rename-PlexFiles ([string]$path) {
                 $ext = Get-Extension $_.Name
                 if ($ext) {
                     Rename-Item $_.FullName -NewName "$newFileName.$ext"
-                    Write-Host "$($_.Name) renamed to: $newFileName.$ext"`n @successColors
-                    Write-Host ""
+                    if ($?) { Write-Host "$($_.Name) renamed to: $newFileName.$ext"`n @successColors }
+                    else {
+                        $msg = "Failed to rename $($_.Name). This is usually caused by embedded special" +   
+                        " characters in the file name, and are not always visible." 
+                        Write-Host $msg @warnColors  
+                    }
                 }
                 else {
                     Write-Host "$($_.Name) is using an unsupported file extension. Skipping...."`n @warnColors
