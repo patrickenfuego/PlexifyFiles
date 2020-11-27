@@ -118,6 +118,8 @@ $windowsDefaultPath = "C:\Users\$env:USERNAME\Videos"
 $warnColors = @{ForegroundColor = 'Yellow' ; BackgroundColor = 'Black' }
 #Successful rename colors
 $successColors = @{ ForegroundColor = "Green"; BackgroundColor = "Black" }
+#Cool magenta color for starting script and path validation
+$startColors = @{ ForegroundColor = "DarkMagenta"; BackgroundColor = "Black" }
 
 ##End Global Variables ##
 
@@ -196,7 +198,7 @@ function Set-Path ([string]$path) {
     #The user entered a specific path
     elseif (Test-Path -Path $path) {
         $rootDir = $path
-        Write-Host "Path validation successful. Path is:`t$rootDir"`n @successColors
+        Write-Host "Path validation successful. Path is:`t$rootDir"`n @$startColors
         return $rootDir
     }
     #the user supplied path could not be verified 
@@ -356,7 +358,7 @@ function Rename-PlexFiles ([string]$path) {
 
 ###################################### Main script logic ######################################
 
-Write-Host "`n`nStarting script..." @successColors
+Write-Host "`nStarting script..." @$startColors
 
 $validatedPath = Set-Path $Path
 Rename-RootDirectory $validatedPath
