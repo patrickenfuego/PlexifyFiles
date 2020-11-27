@@ -309,6 +309,7 @@ function Rename-PlexFiles ([string]$path) {
         Get-ChildItem -LiteralPath $_.FullName | ForEach-Object {
             #If the current object is a directory
             if (Test-Path -Path $_.FullName -PathType Container) {
+                Write-host "Folder name is:`t`t`t$($_.Name)"
                 #Skip rename for Featurettes/Extras folder if one is present
                 if ($_.Name -match "Featurettes" -or $_.Name -match "Extras") {
                     Write-Host "Skipping Featurettes rename..."`n
@@ -334,6 +335,7 @@ function Rename-PlexFiles ([string]$path) {
             }
             #If the current object is a file
             elseif (Test-Path -Path $_.FullName -PathType Leaf) {
+                Write-host "File name is:`t`t`t$($_.Name)"
                 $ext = Get-Extension $_.Name
                 if ($ext) {
                     Rename-Item $_.FullName -NewName "$newFileName.$ext"
