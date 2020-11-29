@@ -48,9 +48,9 @@ the script will recursively rename all directories (and their respective files) 
 
 The script can also receive an optional user defined path as a command line argument. To use a different path:
 
-        PS> .\PlexifyFiles.ps1 -RenamePath 'C:\Users\user\some\directory'
+        PS> .\PlexifyFiles.ps1 -Path 'C:\Users\user\some\directory'
         
-For additional information, use the -`Help` parameter:
+For additional information, use the `-Help` parameter:
 
         PS> .\PlexifyFiles -Help
         
