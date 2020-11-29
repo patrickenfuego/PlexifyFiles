@@ -28,7 +28,7 @@ TV show folders will look like this after running the script:
 
 Each season must have its own folder. The script will look for "S01" in the folder name, and rename folders to:
 
->Season1
+>Season 1
 
 Episode files will look like:
 
