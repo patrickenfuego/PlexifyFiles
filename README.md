@@ -24,7 +24,7 @@ And the files will look like this:
 
 TV show folders will look like this after running the script:
 
-Game of Thrones 1080p
+>Game of Thrones 1080p
 
 Each season must have its own folder. The script will look for "S01" in the folder name, and rename folders to:
 
