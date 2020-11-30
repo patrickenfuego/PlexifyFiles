@@ -1,3 +1,4 @@
+
 <#
     .SYNOPSIS
 
@@ -73,13 +74,13 @@
 
             WINDOWS - Pass the absolute path to the directory where your files are located. 
 
-                .\PlexifyMovies -Path "C:\Users\User\Desktop\Movies"
+                .\PlexifyFiles -Path "C:\Users\User\Desktop\Movies"
 
             MAC / LINUX - Default path starts in the user's home directory, so the relative path is fine in most cases.
                           If you are having issues, try using the absolute path instead. 
                                   
-                .\PlexifyMovies -Path '~/Movies'
-                .\PlexifyMovies -Path '~/Desktop/Staging
+                .\PlexifyFiles -Path '~/Movies'
+                .\PlexifyFiles -Path '~/Desktop/Staging
 
     .PARAMETER Help
 
@@ -227,6 +228,7 @@ function Get-Extension ($file) {
         Default { return $null }
     }
 }
+
 #Returns the new file name based on the matched expression
 function Get-MediaFileName ($value) {
     switch -Regex ($value) {
@@ -241,6 +243,7 @@ function Get-MediaFileName ($value) {
         default { return $value }
     }
 }
+
 #Returns the season number based on the matched expression
 function Get-SeasonNumber ($value) {
     switch -Regex ($value) {
@@ -371,4 +374,3 @@ Rename-RootDirectory $validatedPath
 Rename-PlexFiles $validatedPath
 
 Read-Host -Prompt "Press Enter to exit"
-
