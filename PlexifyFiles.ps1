@@ -88,7 +88,7 @@
 
     .NOTES
         Written by: Patrick Kelly
-        Last Edited: 11/08/2020
+        Last Edited: 12/01/2020
 
         VERSION HISTORY:
 
@@ -99,7 +99,8 @@
         Version 1.2.2 - Fixed renaming issue when season number is 10 or greater
         Version 1.3.2 - Added -Help switch parameter and updated help info
         Version 1.4.2 - Split Confirm-Regex match into 2 separate functions
-                        Improved console message descriptions, with updated colors and formatting
+                        Improved console message descriptions with updated colors and formatting
+        Version 1.4.3 - Fixed path bug where movie files were getting skipped over
 #>
 
 param (
@@ -262,7 +263,7 @@ function Get-SeasonNumber ($value) {
     }
 }
 
-#Renames the root directory for each movie/show
+#Renames the root directory for each movie/show. Returns the file name used in Rename-PlexFiles
 function Rename-RootDirectory ([string]$path) {
     Get-ChildItem -Path $path -Directory | ForEach-Object {  
         #Checks for a movie title match   
@@ -272,13 +273,15 @@ function Rename-RootDirectory ([string]$path) {
             $year = "($($Matches.year))"
             $resolution = ($Matches.res).Trim()
             $title = "$name $year $resolution"
-            #$_.Name.Replace($_.Name, $title)
-            Rename-Item $_.FullName -NewName ($_.Name.Replace($_.Name, $title)) -ErrorAction 'SilentlyContinue'
+
+            Rename-Item -LiteralPath $_.FullName -NewName $title -ErrorAction 'SilentlyContinue'
             if ($?) { Write-Host "Root directory $title renamed successfully" @successColors }
             else {
                 $msg = "There was an issue renaming <$($_.Name)>. This usually happens when " + 
-                "attempting to rename a folder with the same existing name."
-                Write-Host $msg @warnColors 
+                "attempting to rename a folder with the same existing name, or if the folder " +
+                "is using unsupported chracters (these are not always visible to the user).`n" +
+                "Skipping folder rename..."
+                Write-Host $msg @warnColors
             }
         }
         #Checks for a TV show match
@@ -291,8 +294,10 @@ function Rename-RootDirectory ([string]$path) {
             Rename-Item $_.FullName -NewName ($_.Name.Replace($_.Name, $title))
             if ($?) { Write-Host "Root directory $title renamed successfully" @successColors }
             else {
-                $msg = "There was an issue renaming  $($_.Name). This usually happens when " + 
-                "attempting to rename a folder with the same existing name."
+                $msg = "There was an issue renaming <$($_.Name)>. This usually happens when " + 
+                "attempting to rename a folder with the same existing name, or if the folder " +
+                "is using unsupported chracters (these are not always visible to the user).`n" +
+                "Skipping folder rename..."
                 Write-Host $msg @warnColors  
             }
         }
@@ -308,7 +313,7 @@ function Rename-RootDirectory ([string]$path) {
 }
 
 #Main function
-function Rename-PlexFiles ([string]$path) {
+function Rename-PlexFiles ([string]$path, [string]$newFileName) {
     #Recurse the root directories and subdirectories
     Get-ChildItem -Path $path -Directory | ForEach-Object {
         #match the new root folder name
@@ -343,11 +348,11 @@ function Rename-PlexFiles ([string]$path) {
                 }  
             }
             #If the current object is a file
-            elseif (Test-Path -Path $_.FullName -PathType Leaf) {
+            elseif (Test-Path -LiteralPath $_.FullName -PathType Leaf) {
                 Write-host "File name is:`t`t`t$($_.Name)"
                 $ext = Get-Extension $_.Name
                 if ($ext) {
-                    Rename-Item $_.FullName -NewName "$newFileName.$ext"
+                    Rename-Item -LiteralPath $_.FullName -NewName "$newFileName.$ext"
                     if ($?) { Write-Host "$($_.Name) renamed to: $newFileName.$ext"`n @successColors }
                     else {
                         $msg = "Failed to rename $($_.Name). This is usually caused by embedded special" +   
