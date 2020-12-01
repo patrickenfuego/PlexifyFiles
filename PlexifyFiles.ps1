@@ -199,7 +199,6 @@ function Set-Path ([string]$path) {
             return $rootDir
         }
         else {
-            Write-Host "There was an issue resolving the path on $OS. Exiting..." @warnColors
             Throw "Could not resolve the default path for $OS. Check that the global variable path exists."
         }
     }
@@ -211,7 +210,6 @@ function Set-Path ([string]$path) {
     }
     #the user supplied path could not be verified 
     else {
-        Write-Host "Could not find a supported directory for $path. Exiting..." @warnColors
         Throw "Could not resolve the user supplied path: <$path>. Check that the path exists and try again."
     }
 }
