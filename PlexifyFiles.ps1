@@ -291,7 +291,7 @@ function Rename-RootDirectory ([string]$path) {
             $resolution = ($Matches.res).Trim()
             $title = "$name $resolution"
 
-            Rename-Item -LiteralPath $_.FullName -NewName $title
+            Rename-Item $_.FullName -NewName ($_.Name.Replace($_.Name, $title))
             if ($?) { Write-Host "Root directory $title renamed successfully" @successColors }
             else {
                 $msg = "There was an issue renaming <$($_.Name)>. This usually happens when " + 

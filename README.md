@@ -56,9 +56,9 @@ For additional information, use the `-Help` parameter:
 
 To prevent the accidental renaming of files, the script only supports the most common media file extensions. These include:
 
-- mkv (Matroska)
-- mp4 / m4v (MPEG-4)
-- avi (Audio Video Interleave / Microsoft)
-- srt (text based subtitle file)
+- <b>mkv</b> (Matroska)
+- <b>mp4</b> / <b>m4v</b> (MPEG-4)
+- <b>avi</b> (Audio Video Interleave / Microsoft)
+- <b>srt</b> (text based subtitle file)
 
 Additional extensions can be added by modifying the script. 
