@@ -161,12 +161,12 @@ function Rename-SeasonFiles ($episodes, $seasonNum) {
                 }
             }
             if ($?) {
-                Write-Host "$($episodes[$i - 1].Name) renamed to: $episodeString" @successColors
+                Write-Host $($episodes[$i - 1].Name) " renamed to: $episodeString" @successColors
                 Write-Host ""
             }
         }
         else {
-            Write-Host "$($episodes[$i - 1].Name) is using an unsupported file extension. Skipping...." `
+            Write-Host $($episodes[$i - 1].Name) " is using an unsupported file extension. Skipping...." `
                 @warnColors
             Write-Host ""
         }
