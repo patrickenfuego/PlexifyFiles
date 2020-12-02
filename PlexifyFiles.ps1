@@ -142,22 +142,22 @@ function Rename-SeasonFiles ($episodes, $seasonNum) {
             if ($i -lt 10) { 
                 if ([int]$seasonNum -lt 10) {
                     $episodeString = "$newFileName S0$seasonNum`E0$i.$ext"
-                    Rename-Item $episodes[$i - 1].FullName -NewName $episodeString
+                    Rename-Item -LiteralPath $episodes[$i - 1].FullName -NewName $episodeString
                 }
                 else {
                     $episodeString = "$newFileName S$seasonNum`E0$i.$ext"
-                    Rename-Item $episodes[$i - 1].FullName -NewName $episodeString
+                    Rename-Item -LiteralPath $episodes[$i - 1].FullName -NewName $episodeString
                 }
             }
             #$i is greater than 10
             else {
                 if ([int]$seasonNum -lt 10) {
                     $episodeString = "$newFileName S0$seasonNum`E$i.$ext"
-                    Rename-Item $episodes[$i - 1].FullName -NewName $episodeString
+                    Rename-Item -LiteralPath $episodes[$i - 1].FullName -NewName $episodeString
                 }
                 else {
                     $episodeString = "$newFileName S$seasonNum`E$i.$ext"
-                    Rename-Item $episodes[$i - 1].FullName -NewName $episodeString
+                    Rename-Item -LiteralPath $episodes[$i - 1].FullName -NewName $episodeString
                 }
             }
             if ($?) {
@@ -291,7 +291,7 @@ function Rename-RootDirectory ([string]$path) {
             $resolution = ($Matches.res).Trim()
             $title = "$name $resolution"
 
-            Rename-Item $_.FullName -NewName ($_.Name.Replace($_.Name, $title))
+            Rename-Item -LiteralPath $_.FullName -NewName $title
             if ($?) { Write-Host "Root directory $title renamed successfully" @successColors }
             else {
                 $msg = "There was an issue renaming <$($_.Name)>. This usually happens when " + 
@@ -313,7 +313,7 @@ function Rename-RootDirectory ([string]$path) {
 }
 
 #Main function
-function Rename-PlexFiles ([string]$path, [string]$newFileName) {
+function Rename-PlexFiles ([string]$path) {
     #Recurse the root directories and subdirectories
     Get-ChildItem -Path $path -Directory | ForEach-Object {
         #match the new root folder name
