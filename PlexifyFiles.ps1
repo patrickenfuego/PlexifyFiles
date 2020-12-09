@@ -134,7 +134,7 @@ $startColors = @{ ForegroundColor = "DarkMagenta"; BackgroundColor = "Black" }
 
 #function that renames episode files. See .EXAMPLES for formatting
 function Rename-SeasonFiles ($episodes, $seasonNum) {
-    for ($i = 1; $i -le $episodes.Length; $i++) {
+    for ($i = 1; $i -le $episodes.length; $i++) {
         #Get the full extension. If an unsupported extension is used, returns $null
         $ext = Get-Extension $episodes[$i - 1].ToString()
         Write-Host "File name is:`t" $episodes[$i - 1]
@@ -166,7 +166,7 @@ function Rename-SeasonFiles ($episodes, $seasonNum) {
             }
         }
         else {
-            Write-Host $($episodes[$i - 1].Name) " is using an unsupported file extension. Skipping...." `
+            Write-Host $episodes[$i - 1].Name " is using an unsupported file extension. Skipping...." `
                 @warnColors
             Write-Host ""
         }
@@ -229,17 +229,38 @@ function Get-Extension ($file) {
 }
 
 #Returns the new file name based on the matched expression
-function Get-MediaFileName ($value) {
+function Get-MediaFileName ($value, [switch]$RootFolder) {
     switch -Regex ($value) {
-        "(?<title>.*)\s(?<year>\(\d{4}\))\s(?<res>\d*p)(?<extras>.*)" {
-            $newFileName = "$($Matches.title) $($Matches.year)"
-            return $newFileName
+        #Matching movies
+        "(?<title>.*)[\.\s\[\(]+(?<year>\d{4}).*[\.\s\[\(]+(?<res>\d{3,4}p)" {
+            if ($RootFolder) {
+                $name = ($Matches.title.Replace(".", " ")).Trim()
+                $name = $name.Replace(":", " -")
+                $year = "($($Matches.year))"
+                $resolution = ($Matches.res).Trim()
+                $title = "$name $year $resolution"
+                return $title
+            }
+            else {
+                $newFileName = "$($Matches.title) $($Matches.year)"
+                return $newFileName
+            }
         }
-        "(?<title>.*)\s(?<res>\d*\w).*" {
-            $newFileName = "$($Matches.title)"
-            return $newFileName
+        #Matching tv shows
+        "(?<title>.*)[\.\s\[\(]+(?<res>\d{3,4}p)" {
+            if ($RootFolder) {
+                $name = ($Matches.title.Replace(".", " ")).Trim()
+                $name = $name.Replace(":", " -")
+                $resolution = ($Matches.res).Trim()
+                $title = "$name $resolution"
+                return $title
+            }
+            else {
+                $newFileName = "$($Matches.title)"
+                return $newFileName
+            }
         }
-        default { return $value }
+        default { return $null }
     }
 }
 
@@ -266,48 +287,25 @@ function Get-SeasonNumber ($value) {
 #Renames the root directory for each movie/show. Returns the file name used in Rename-PlexFiles
 function Rename-RootDirectory ([string]$path) {
     Get-ChildItem -Path $path -Directory | ForEach-Object {  
-        #Checks for a movie title match   
-        if ($_.Name -match "(?<title>.*)[\.\s\[\(]+(?<year>\d{4}).*[\.\s\[\(]+(?<res>\d{3,4}p)") {
-            $name = ($Matches.title.Replace(".", " ")).Trim()
-            $name = $name.Replace(":", " -")
-            $year = "($($Matches.year))"
-            $resolution = ($Matches.res).Trim()
-            $title = "$name $year $resolution"
-
-            Rename-Item -LiteralPath $_.FullName -NewName $title -ErrorAction 'SilentlyContinue'
+        $title = Get-MediaFileName $_.Name -RootFolder
+        if ($title) {
+            Rename-Item -LiteralPath $_.FullName -NewName $title
             if ($?) { Write-Host "Root directory $title renamed successfully" @successColors }
             else {
                 $msg = "There was an issue renaming <$($_.Name)>. This usually happens when " + 
                 "attempting to rename a folder with the same existing name, or if the folder " +
-                "is using unsupported chracters (these are not always visible to the user).`n" +
+                "is using unsupported chracters.`n" +
                 "Skipping folder rename..."
                 Write-Host $msg @warnColors
             }
-        }
-        #Checks for a TV show match
-        elseif ($_.Name -match "(?<title>.*)[\.\s\(]+(?<res>\d{3,4}p)") {
-            $name = ($Matches.title.Replace(".", " ")).Trim()
-            $name = $name.Replace(":", " -")
-            $resolution = ($Matches.res).Trim()
-            $title = "$name $resolution"
-
-            Rename-Item $_.FullName -NewName ($_.Name.Replace($_.Name, $title))
-            if ($?) { Write-Host "Root directory $title renamed successfully" @successColors }
-            else {
-                $msg = "There was an issue renaming <$($_.Name)>. This usually happens when " + 
-                "attempting to rename a folder with the same existing name, or if the folder " +
-                "is using unsupported chracters (these are not always visible to the user).`n" +
-                "Skipping folder rename..."
-                Write-Host $msg @warnColors  
-            }
-        }
+        } 
         else {
             $msg = "There was an issue renaming the root folder: $($_.Name). " +
             "This occurs when a reliable match cannot be made for movie/TV show " +
             "folder name in its current format.`nSkipping rename..."
             Write-Host $msg @warnColors
             continue
-        }   
+        }
     }
     Write-Host ""
 }
@@ -318,7 +316,14 @@ function Rename-PlexFiles ([string]$path) {
     Get-ChildItem -Path $path -Directory | ForEach-Object {
         #match the new root folder name
         $newFileName = Get-MediaFileName $_.Name 
-        Write-host "Folder template name is:`t$newFileName"
+        if ($newFileName) { Write-host "Folder template name is:`t$newFileName" }
+        else {
+            $msg = "There was an issue getting the new file name for: $($_.Name). " +
+            "This usually occurs when a reliable match cannot be made for movie/TV show " +
+            "folder name in its current format.`nSkipping rename..."
+            Write-Host $msg @warnColors
+            continue
+        }
         #Rename files inside parent folder
         Get-ChildItem -LiteralPath $_.FullName | ForEach-Object {
             #If the current object is a directory
