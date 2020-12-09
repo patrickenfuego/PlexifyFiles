@@ -119,7 +119,7 @@ if ($Help) {
 ### Global Variables ###
 
 #Change these to modify the default folder to recurse for each operating system type
-$macDefaultPath = '~/Movies'
+$macDefaultPath = '~/Movies/Torrents'
 $linuxDefaultPath = '~/Videos'
 $windowsDefaultPath = "C:\Users\$env:USERNAME\Videos"
 
@@ -233,16 +233,16 @@ function Get-MediaFileName ($value, [switch]$RootFolder) {
     switch -Regex ($value) {
         #Matching movies
         "(?<title>.*)[\.\s\[\(]+(?<year>\d{4}).*[\.\s\[\(]+(?<res>\d{3,4}p)" {
+            $name = ($Matches.title.Replace(".", " ")).Trim()
+            $name = $name.Replace(":", " -")
+            $year = "($($Matches.year))".Trim()
+            $resolution = ($Matches.res).Trim()
             if ($RootFolder) {
-                $name = ($Matches.title.Replace(".", " ")).Trim()
-                $name = $name.Replace(":", " -")
-                $year = "($($Matches.year))"
-                $resolution = ($Matches.res).Trim()
                 $title = "$name $year $resolution"
                 return $title
             }
             else {
-                $newFileName = "$($Matches.title) $($Matches.year)"
+                $newFileName = "$name $year"
                 return $newFileName
             }
         }
