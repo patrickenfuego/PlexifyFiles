@@ -242,7 +242,7 @@ function Get-MediaFileName ($value, [switch]$RootFolder) {
                 return $title
             }
             else {
-                $newFileName = "$name ($year)"
+                $newFileName = "$name $year"
                 return $newFileName
             }
         }
