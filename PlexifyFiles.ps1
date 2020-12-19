@@ -119,7 +119,7 @@ if ($Help) {
 ### Global Variables ###
 
 #Change these to modify the default folder to recurse for each operating system type
-$macDefaultPath = '~/Movies/Torrents'
+$macDefaultPath = '~/Movies'
 $linuxDefaultPath = '~/Videos'
 $windowsDefaultPath = "C:\Users\$env:USERNAME\Videos"
 
